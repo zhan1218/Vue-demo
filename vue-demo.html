@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>品牌管理</title>
+    <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+    <style>
+        #app {
+            width: 600px;
+            margin: 10px auto;
+        }
+
+        .tb {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .tb th {
+            background-color: #0094ff;
+            color: white;
+        }
+
+        .tb td,
+        .tb th {
+            padding: 5px;
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .add {
+            padding: 5px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<script type="text/html" id="templateId">
+    <div>
+            <div class="add">
+                编号:
+                <input v-model="id" type="text"> 品牌名称:
+                <input v-model="name" @keyup.enter="add" type="text">
+                <input type="button" value="添加" @click="add">
+            </div>
+
+            <div class="add">
+                品牌名称:
+                <!-- 如果我们调用的函数，没有参数，我们可以加()，也可以不加 -->
+                <input type="text" placeholder="请输入搜索条件" @keyup.13="searchByKeyword" v-model="keyword">
+            </div>
+            <table class="tb">
+                <tr>
+                    <th>编号</th>
+                    <th>品牌名称</th>
+                    <th>创立时间</th>
+                    <th>操作</th>
+                </tr>
+                <!-- 当页面数据被删完时,则显示无数据 -->
+                <tr v-if="brandList.length===0"><td colspan="4">没有数据啦~~</td></tr>
+                <!-- 动态生成内容tr -->
+                <tr v-for="item in brandList" :key="item.id">
+                    <td>{{item.id}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.time}}</td>
+                    <td><a href="#" @click="deleteById(item.id)">删除</a></td>
+                </tr>
+            </table>
+        </div>
+
+</script>
+<body>
+    <div id="app">
+        <brand-manager></brand-manager>
+    </div>
+</body>
+<script>
+    //定义和注册一步到位
+    Vue.component('brand-manager',{
+        template:`#templateId`,
+        data(){
+            return {
+                brandList:[
+                    {id:1,name:"奥迪",time:new Date()},
+                    {id:2,name:"迪奥",time:new Date()},
+                    {id:3,name:"宝马",time:new Date()}
+                ],
+                // 设置一个相同的数组来保存记录
+                oldbrandList:[
+                    {id:1,name:"奥迪",time:new Date()},
+                    {id:2,name:"迪奥",time:new Date()},
+                    {id:3,name:"宝马",time:new Date()}
+                ],
+                id:'',
+                name:'',
+                keyword:''
+            }
+        },
+        methods:{
+            // 添加数据
+            add(){
+                this.brandList.push({
+                    id:this.id,
+                    name:this.name,
+                    time:new Date()
+                })
+                // 把最新的brandList数组赋值给oldbrandList保存起来
+                this.oldbrandList=this.brandList
+                // 重置id和name(这样输入框就不会显示原来输入的数据)
+                this.id=""
+                this.name=""
+            },
+            // 删除数据
+            deleteById(id){
+                // console.log(id)
+                // findIndex找到索引,如果当前的索引和产品当前的id相同就删除,使用splice(要删除的索引index,删除的个数1)
+                const index=this.brandList.findIndex(item=>{
+                    return item.id===id
+                })
+                // console.log(index)
+                if( confirm('是否删除?')===true){
+                    this.brandList.splice(index,1)
+                }
+                //把最新的brandList数组赋值给oldBrandList，保存起来
+                this.oldbrandList = this.brandList
+                
+            },
+            // 搜索(根据关键词查找)
+            searchByKeyword(){
+                // 如果关键词栏没有任何keyword,则显示原有的数据
+                if(this.keyword.trim().length===0){
+                    this.brandList=this.oldbrandList
+                    return
+                }
+                // brandList是一个数组,可以过滤filter,匹配数组里对象中的name属性值是否包含includes这个搜索的关键词
+                const newBrandList=this.brandList.filter(item=>{
+                    return item.name.includes(this.keyword)
+                   
+                })
+                // newBrandList是一个数组
+                console.log(newBrandList)
+                // 如果使用关键词搜索到对应的数据,则显示搜索到的新数据
+                this.brandList=newBrandList
+            }
+        }
+    })
+
+    var vm = new Vue({
+        el:"#app"
+    })
+</script>
+</html>
